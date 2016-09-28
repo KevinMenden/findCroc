@@ -117,39 +117,56 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
   # Get the sequence from $mem
   sequence <- moveInfo$mem
   
-#   # Check if a tourist has been eaten
-#   if (!identical(positions[1], NA) && positions[1] < 0){
-#     currentPosition <- abs(positions[1])
-#     # Set the readings to the exact mean values of the waterhole
-#     readings[1] <- probs[[1]][currentPosition,1]
-#     readings[2] <- probs[[2]][currentPosition,1]
-#     readings[3] <- probs[[3]][currentPosition,1]
-#     
-#     # Reset sequence
-#     sequence <- list()
-#     sequence[[1]] <- readings
-#   } else {
-#     # same for tourist 2
-#     if (!identical(positions[2], NA) && positions[2] < 0){
-#       currentPosition <- abs(positions[2])
-#       readings[1] <- probs[[1]][currentPosition,1]
-#       readings[2] <- probs[[2]][currentPosition,1]
-#       readings[3] <- probs[[3]][currentPosition,1]
-#       
-#       # Reset sequence
-#       sequence <- list()
-#       sequence[[1]] <- readings
-#     }
-#   }
+  crocsPosition <- 0
+  
+  touristEaten <- F
+  
+  # Check if a tourist has been eaten
+  if (!is.na(positions[1])){
+    if (positions[1] < 0){
+      touristEaten <- T
+    print("Tourist 1 has been eaten")
+    currentPosition <- abs(positions[1])
+    crocsPosition <- currentPosition
+    # Set the readings to the exact mean values of the waterhole
+    readings[1] <- probs[[1]][currentPosition,1]
+    readings[2] <- probs[[2]][currentPosition,1]
+    readings[3] <- probs[[3]][currentPosition,1]
+    
+    # Reset sequence
+    sequence <- list()
+    sequence[[1]] <- readings
+    }
+  } 
+    # same for tourist 2
+    if (!is.na(positions[2])){
+      if (positions[2] < 0){
+        touristEaten <- T
+        print("Tourist 2 has been eaten")
+      currentPosition <- abs(positions[2])
+      crocsPosition <- currentPosition
+      readings[1] <- probs[[1]][currentPosition,1]
+      readings[2] <- probs[[2]][currentPosition,1]
+      readings[3] <- probs[[3]][currentPosition,1]
+      
+      # Reset sequence
+      sequence <- list()
+      sequence[[1]] <- readings
+      
+      }
+    }
   
   
+  if (!touristEaten){
+    # Add current readings
+    len <- length(sequence)
+    sequence[[len+1]] <- readings
+    # Calculate the most likely position of croc
+    crocsPosition <- runViterbi(sequence = sequence, transmission = transMat, probs = probs)
+  }
   
-  # Add current readings
-  len <- length(sequence)
-  sequence[[len+1]] <- readings
   
   # Calculate the most likely position of croc
-  crocsPosition <- runViterbi(sequence = sequence, transmission = transMat, probs = probs)
   print("Crocs position: ")
   print(crocsPosition)
   
@@ -246,7 +263,7 @@ runViterbi=function(sequence, transmission, probs){
     for (i in 1:40){
       prob = calculateEmissionProbability(readings, i, probs)
       dpMatrix[1,1] <- prob
-      print(prob)
+      # print(prob)
     }
     # Iterate over all observations
     for (i in 2:len){
@@ -267,7 +284,7 @@ runViterbi=function(sequence, transmission, probs){
       }
     }
   }
-  print(dpMatrix)
+  # print(dpMatrix)
   
   # Return the most likely location of croc
   positionLikelihood <- 0

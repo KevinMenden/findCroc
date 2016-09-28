@@ -25,7 +25,8 @@ What has been done so far:
 	reached within one step. Else, the ranger takes one step and then searches the waterhole.
 
 -	The fact that tourists can be eaten and thereby show the position of croc is not yet considered and still needs implementing
+EDIT: Has now been implemented. When tourists are eaten, the probability for this state in the sequence is set to 1.
 
 Note: The estimation of Crocs position is sometimes really good, then Croc is found in a few steps. However sometimes it is really bad and
 then it can take a long time ... I'm not sure if it is because of the emission probability model I used or because the readings are just so
-all over the place (which they are sometimes). But we might wanna try something else out there.
+all over the place (which they are sometimes). But we might wanna try something else out there.	
