@@ -134,8 +134,8 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
     readings[3] <- probs[[3]][currentPosition,1]
     
     # Reset sequence
-    sequence <- list()
-    sequence[[1]] <- readings
+    #sequence <- list()
+    #sequence[[1]] <- readings
     }
   } 
     # same for tourist 2
@@ -150,25 +150,27 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
       readings[3] <- probs[[3]][currentPosition,1]
       
       # Reset sequence
-      sequence <- list()
-      sequence[[1]] <- readings
+      #sequence <- list()
+      #sequence[[1]] <- readings
       
       }
     }
   
+  len <- length(sequence)
+  sequence[[len+1]] <- readings
   
   if (!touristEaten){
     # Add current readings
-    len <- length(sequence)
-    sequence[[len+1]] <- readings
+    #len <- length(sequence)
+    #sequence[[len+1]] <- readings
     # Calculate the most likely position of croc
     crocsPosition <- runViterbi(sequence = sequence, transmission = transMat, probs = probs)
   }
   
   
   # Calculate the most likely position of croc
-  print("Crocs position: ")
-  print(crocsPosition)
+  #print("Crocs position: ")
+  #print(crocsPosition)
   
   # Find shortest path to Croc and go in that direction
   path <- astar(positions[3], crocsPosition, edges)
@@ -227,7 +229,9 @@ calculateEmissionProbability=function(readings, wh, probs){
   nitProb = calculateReadingProbability(readings[3], probs[[3]][wh,1], probs[[3]][wh,2])
   
   # Return joint probability of these readings for wh
-  return (salProb * phosProb * nitProb)
+  #return (salProb * phosProb * nitProb)
+  # Add the logarithms
+  return(log(salProb) + log(phosProb) + log(nitProb))
 }
 
 # Run the viterbi algorithm
@@ -246,7 +250,7 @@ runViterbi=function(sequence, transmission, probs){
   
   # Only one obvervation
   if (len == 1){
-    max <- 0
+    max <- -Inf
     readings <- sequence[[1]]
     for (i in 1:40){
       prob = calculateEmissionProbability(readings, i, probs)
@@ -272,22 +276,23 @@ runViterbi=function(sequence, transmission, probs){
       for (j in 1:40){
         emProb <- calculateEmissionProbability(readings, j, probs)
         # Find most likely transition from last states
-        maxTrans <- 0
+        maxTrans <- -Inf
         for (s in 1:40){
-          probTrans <- transmission[s,j] * dpMatrix[s, i-1]
+          #probTrans <- transmission[s,j] * dpMatrix[s, i-1]
+          probTrans <- log(transmission[s,j]) + dpMatrix[s, i-1]
           if (probTrans >= maxTrans){
             maxTrans <- probTrans
           }
         }
         # Fill dp matrix with maximizing probability
-        dpMatrix[j,i] <- (maxTrans * emProb)
+        dpMatrix[j,i] <- (maxTrans + emProb)
       }
     }
   }
   # print(dpMatrix)
   
   # Return the most likely location of croc
-  positionLikelihood <- 0
+  positionLikelihood <- -Inf
   for (i in 1:40){
     if (dpMatrix[i,len] >= positionLikelihood) {
       positionLikelihood <- dpMatrix[i, len]
@@ -299,3 +304,11 @@ runViterbi=function(sequence, transmission, probs){
   return (mostLikelyPosition)
 }
 
+testFunction=function(runs){
+  res <- 0
+  for (i in 1:runs){
+    tmp <- runWheresCroc(makeMoves = hmmWC)
+    res <- res + tmp
+  }
+  return (res/runs)
+}
