@@ -1,3 +1,11 @@
+# Hi Sophia
+# Function to pass to runWheresCroc: hmmWC()
+# viterbi function at line 252
+# emission probability calculation at line 235
+
+
+
+# number of waterholes = number of states
 numberOfStates <- 40
 
 #'Priority-Queue. Code from Rosettacode, modified for Project
@@ -36,7 +44,7 @@ traceback <- function(cameFrom, current){
 
 
 # A*-algorithm, croc version
-# heuristic cost function is currently not implemented
+# no heuristic cost function, so actually Dijkstra algorithm
 astar <- function(a, b, edges){
   
   visitedNodes <- list()
@@ -46,11 +54,9 @@ astar <- function(a, b, edges){
   # Save the last states
   cameFrom <- matrix(0, nrow = 1, ncol = numberOfStates)
   
-  #TODO: convert that to list insted of matrix
   gScore <- matrix(Inf, nrow = 1, ncol = numberOfStates)
   gScore[1, a] <- 0
   
-  #TODO: convert that to list insted of matrix
   fScore <- matrix(Inf, nrow = 1, ncol = numberOfStates)
   fScore[1, a] <- 0
   
@@ -102,6 +108,7 @@ astar <- function(a, b, edges){
 
 # The function to be passed to runWheresCroc()
 # It uses an HMM model to guess the position of croc
+# with help of the viterbi algorithm
 # and an A*-algorithm to find the shortest path to it
 hmmWC=function(moveInfo,readings,positions,edges,probs) {
   
@@ -156,6 +163,7 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
       }
     }
   
+  # Add the readings to the list of observations
   len <- length(sequence)
   sequence[[len+1]] <- readings
   
@@ -250,11 +258,11 @@ runViterbi=function(sequence, transmission, probs){
   
   # Only one obvervation
   if (len == 1){
-    max <- -Inf
+    max <- -50
     readings <- sequence[[1]]
     for (i in 1:40){
       prob = calculateEmissionProbability(readings, i, probs)
-      if (prob >= max){
+      if (prob > max){
         max <- prob
         mostLikelyPosition <- i
       }
@@ -266,8 +274,7 @@ runViterbi=function(sequence, transmission, probs){
     readings <- sequence[[1]]
     for (i in 1:40){
       prob = calculateEmissionProbability(readings, i, probs)
-      dpMatrix[1,1] <- prob
-      # print(prob)
+      dpMatrix[i,1] <- prob
     }
     # Iterate over all observations
     for (i in 2:len){
@@ -289,8 +296,7 @@ runViterbi=function(sequence, transmission, probs){
       }
     }
   }
-  # print(dpMatrix)
-  
+
   # Return the most likely location of croc
   positionLikelihood <- -Inf
   for (i in 1:40){
@@ -306,9 +312,20 @@ runViterbi=function(sequence, transmission, probs){
 
 testFunction=function(runs){
   res <- 0
+  max <- 0
+  min <- 10
   for (i in 1:runs){
     tmp <- runWheresCroc(makeMoves = hmmWC)
     res <- res + tmp
+    if (tmp > max) {
+      max <- tmp
+    }
+    if (tmp < min){
+      min <- tmp
+    }
   }
+  print(min)
+  print(max)
+  print(res/runs)
   return (res/runs)
 }
