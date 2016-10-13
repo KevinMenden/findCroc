@@ -141,8 +141,8 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
     readings[3] <- probs[[3]][currentPosition,1]
     
     # Reset sequence
-    #sequence <- list()
-    #sequence[[1]] <- readings
+    sequence <- list()
+    sequence[[1]] <- readings
     }
   } 
     # same for tourist 2
@@ -157,8 +157,8 @@ hmmWC=function(moveInfo,readings,positions,edges,probs) {
       readings[3] <- probs[[3]][currentPosition,1]
       
       # Reset sequence
-      #sequence <- list()
-      #sequence[[1]] <- readings
+      sequence <- list()
+      sequence[[1]] <- readings
       
       }
     }
@@ -315,7 +315,8 @@ testFunction=function(runs){
   max <- 0
   min <- 10
   for (i in 1:runs){
-    tmp <- runWheresCroc(makeMoves = hmmWC)
+    print(i)
+    tmp <- runWheresCroc(makeMoves = hmmWC, showCroc = T)
     res <- res + tmp
     if (tmp > max) {
       max <- tmp
